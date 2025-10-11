@@ -1,5 +1,7 @@
-import express from "express";
 import dotenv from "dotenv";
+dotenv.config();
+
+import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 
@@ -9,7 +11,6 @@ import reservationRoutes from "./routes/reservationRoutes.js";
 import hallRoutes from "./routes/hallRoutes.js";
 import connectDB from "./config/db.js";
 
-dotenv.config();
 const app = express();
 
 // Middlewares

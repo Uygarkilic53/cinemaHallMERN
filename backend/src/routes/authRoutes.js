@@ -42,4 +42,10 @@ router.get("/users", protect, adminOnly, authController.getAllUsers);
 
 router.get("/profile", protect, authController.getProfile);
 
+router.post("/forgot-password", authController.forgotPassword);
+
+router.get("/verify-reset-token/:token", authController.verifyResetToken);
+
+router.post("/reset-password/:token", authController.resetPassword);
+
 export default router;

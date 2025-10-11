@@ -9,6 +9,7 @@ const hallSchema = new mongoose.Schema(
         row: String, // e.g., "A", "B"
         number: Number, // e.g., 1, 2, 3
         isReserved: { type: Boolean, default: false },
+        seatPrice: { type: Number, required: true, default: 20 },
       },
     ],
   },

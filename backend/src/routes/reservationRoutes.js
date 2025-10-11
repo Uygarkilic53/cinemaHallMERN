@@ -10,6 +10,18 @@ router.post(
   reservationController.createReservation
 );
 
+router.post(
+  "/confirm-reservation",
+  protect,
+  reservationController.confirmReservation
+);
+
+router.post(
+  "/cancel-reservation/:id",
+  protect,
+  reservationController.cancelReservation
+);
+
 router.get(
   "/my-reservations",
   protect,

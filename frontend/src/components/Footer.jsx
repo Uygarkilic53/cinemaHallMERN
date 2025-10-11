@@ -26,6 +26,14 @@ const Footer = () => {
                 Halls
               </a>
             </li>
+            <li>
+              <a
+                href="/my-reservations"
+                className="hover:text-white transition"
+              >
+                My Reservations
+              </a>
+            </li>
           </ul>
         </div>
 

@@ -106,6 +106,23 @@ export default function Login() {
           >
             Login
           </button>
+
+          <div>
+            <a
+              href="/signup"
+              class="text-sm font-semibold text-indigo-600 hover:text-indigo-500 transition duration-300 ease-in-out"
+            >
+              Don't have an account? <span class="underline">Sign Up</span>
+            </a>
+          </div>
+          <div>
+            <a
+              href="/forgot-password"
+              class="text-sm font-semibold text-indigo-600 hover:text-indigo-500 transition duration-300 ease-in-out"
+            >
+              Forgot Password?
+            </a>
+          </div>
         </div>
       </form>
     </div>

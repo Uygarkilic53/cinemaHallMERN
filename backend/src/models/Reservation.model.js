@@ -9,19 +9,25 @@ const reservationSchema = new mongoose.Schema(
       required: true,
     },
     hall: { type: mongoose.Schema.Types.ObjectId, ref: "Hall", required: true },
-    showtime: { type: String, required: true }, // keep string for UI (like "22:00")
-    showtimeDate: { type: Date, required: true }, // store actual date+time
+    showtime: { type: String, required: true },
+    showtimeDate: { type: Date, required: true },
     seats: [
       {
-        row: String,
-        number: Number,
+        row: { type: String, required: true },
+        number: { type: Number, required: true },
       },
     ],
     status: {
       type: String,
-      enum: ["reserved", "cancelled", "expired"],
-      default: "reserved",
+      enum: ["pending", "reserved", "cancelled"],
+      default: "pending",
     },
+    stripePaymentIntentId: {
+      type: String,
+      required: false, // ✅ Change to false - it's added after creation
+    },
+    amount: { type: Number, required: true },
+    currency: { type: String, default: "usd" },
   },
   { timestamps: true }
 );

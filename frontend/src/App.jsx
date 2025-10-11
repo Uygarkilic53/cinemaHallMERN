@@ -16,6 +16,8 @@ import "react-toastify/dist/ReactToastify.css";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
 import RedirectLoggedIn from "./components/RedirectLoggedIn.jsx";
 import AdminRoute from "./components/AdminRoute.jsx";
+import ForgotPassword from "./pages/ForgotPassword.jsx";
+import ResetPassword from "./pages/ResetPassword.jsx";
 
 function App() {
   return (
@@ -26,6 +28,8 @@ function App() {
           <ToastContainer position="top-center" autoClose={1000} />
           <Routes>
             <Route path="/" element={<Movies />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password/:token" element={<ResetPassword />} />
 
             {/* Redirect logged-in users from login/signup */}
             <Route
