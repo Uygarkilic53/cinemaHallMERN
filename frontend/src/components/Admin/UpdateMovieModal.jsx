@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { FiX, FiClock, FiPlus } from "react-icons/fi";
+import { FiX, FiClock, FiPlus, FiAlertTriangle } from "react-icons/fi";
 import { toast } from "react-toastify";
 import api from "../../services/api.js";
 import {
@@ -18,15 +18,14 @@ const UpdateMovieModal = ({ movie, onClose, onUpdateSuccess }) => {
   const [loading, setLoading] = useState(false);
   const [newShowtime, setNewShowtime] = useState("");
   const [suggestedShowtimes, setSuggestedShowtimes] = useState([]);
+  const [occupiedHalls, setOccupiedHalls] = useState(new Set());
 
   // Format existing showtimes from ISO strings to HH:MM format
   const formatExistingShowtimes = (showtimes) => {
     return showtimes.map((time) => {
-      // If it's already in HH:MM format, return as is
       if (typeof time === "string" && /^\d{2}:\d{2}$/.test(time)) {
         return time;
       }
-      // If it's an ISO string or Date object, format it
       const date = new Date(time);
       return formatTime(date);
     });
@@ -34,7 +33,7 @@ const UpdateMovieModal = ({ movie, onClose, onUpdateSuccess }) => {
 
   // Generate suggested showtimes based on existing ones
   const updateSuggestedShowtimes = (existingTimes) => {
-    const movieDuration = movie?.duration || 120; // Default 120 minutes if not available
+    const movieDuration = movie?.duration || 120;
     const suggestions = generateSuggestedShowtimes(
       existingTimes,
       movieDuration,
@@ -44,22 +43,34 @@ const UpdateMovieModal = ({ movie, onClose, onUpdateSuccess }) => {
     setSuggestedShowtimes(suggestions);
   };
 
-  // Fetch available halls
+  // Fetch available halls and check which ones are occupied
   const fetchHalls = async () => {
     try {
       const res = await api.get("/halls/get-halls");
+      const hallsData = Array.isArray(res.data)
+        ? res.data
+        : res.data.halls || [];
+      setHalls(hallsData);
 
-      if (Array.isArray(res.data)) {
-        setHalls(res.data);
-      } else if (res.data.success && res.data.halls) {
-        setHalls(res.data.halls);
-      } else {
-        console.log("No halls found");
-        setHalls([]);
+      // Fetch movies in theaters to check occupied halls
+      if (movie?.inTheaters) {
+        try {
+          const moviesRes = await api.get("/movies/get-in-theaters");
+          const inTheaterMovies = moviesRes.data.movies || moviesRes.data || [];
+
+          // Create a set of occupied hall IDs (excluding current movie's hall)
+          const occupied = new Set(
+            inTheaterMovies
+              .filter((m) => m._id !== movie._id && m.hall?._id)
+              .map((m) => m.hall._id)
+          );
+          setOccupiedHalls(occupied);
+        } catch (err) {
+          console.error("Error fetching in-theater movies:", err);
+        }
       }
     } catch (err) {
       console.error("Error fetching halls:", err);
-
       if (err.response?.status === 404) {
         setHalls([]);
         toast.info("No halls available");
@@ -81,7 +92,6 @@ const UpdateMovieModal = ({ movie, onClose, onUpdateSuccess }) => {
     }
   }, [movie]);
 
-  // Update suggestions when showtimes change
   useEffect(() => {
     updateSuggestedShowtimes(formData.showtimes);
   }, [formData.showtimes]);
@@ -100,7 +110,6 @@ const UpdateMovieModal = ({ movie, onClose, onUpdateSuccess }) => {
       return;
     }
 
-    // Validate the showtime
     const movieDuration = movie?.duration || 120;
     const validation = validateShowtime(
       timeStr,
@@ -115,10 +124,10 @@ const UpdateMovieModal = ({ movie, onClose, onUpdateSuccess }) => {
 
     setFormData((prev) => ({
       ...prev,
-      showtimes: [...prev.showtimes, timeStr].sort(), // Sort times chronologically
+      showtimes: [...prev.showtimes, timeStr].sort(),
     }));
 
-    setNewShowtime(""); // Clear input
+    setNewShowtime("");
   };
 
   const handleAddShowtime = () => {
@@ -149,11 +158,21 @@ const UpdateMovieModal = ({ movie, onClose, onUpdateSuccess }) => {
       return;
     }
 
+    // Convert HH:MM strings to Date objects
+    const formattedShowtimes = formData.showtimes
+      .map(parseShowtime)
+      .filter(Boolean);
+
+    if (formattedShowtimes.length !== formData.showtimes.length) {
+      toast.error("Some showtimes are invalid. Please check and try again.");
+      return;
+    }
+
     try {
       setLoading(true);
       const res = await api.put(`/movies/update-movie/${movie._id}`, {
         hallId: formData.hallId,
-        showtimes: formData.showtimes,
+        showtimes: formattedShowtimes,
       });
 
       if (res.data.msg === "Movie updated successfully") {
@@ -164,7 +183,16 @@ const UpdateMovieModal = ({ movie, onClose, onUpdateSuccess }) => {
       }
     } catch (err) {
       console.error("Error updating movie:", err);
-      toast.error("Error updating movie");
+
+      // Handle hall conflict error
+      if (
+        err.response?.status === 400 &&
+        err.response?.data?.conflictingMovie
+      ) {
+        toast.error(err.response.data.msg, { autoClose: 5000 });
+      } else {
+        toast.error(err.response?.data?.msg || "Error updating movie");
+      }
     } finally {
       setLoading(false);
     }
@@ -203,12 +231,30 @@ const UpdateMovieModal = ({ movie, onClose, onUpdateSuccess }) => {
               required
             >
               <option value="">Choose a hall...</option>
-              {halls.map((hall) => (
-                <option key={hall._id} value={hall._id}>
-                  {hall.name} (Capacity: {hall.totalSeats})
-                </option>
-              ))}
+              {halls.map((hall) => {
+                const isOccupied = occupiedHalls.has(hall._id);
+                return (
+                  <option key={hall._id} value={hall._id} disabled={isOccupied}>
+                    {hall.name} (Capacity: {hall.totalSeats})
+                    {isOccupied ? " - Already Occupied" : ""}
+                  </option>
+                );
+              })}
             </select>
+
+            {/* Warning for occupied halls */}
+            {movie?.inTheaters && occupiedHalls.size > 0 && (
+              <div className="mt-2 p-2 bg-yellow-50 border border-yellow-200 rounded-md flex items-start gap-2">
+                <FiAlertTriangle
+                  className="text-yellow-600 mt-0.5 flex-shrink-0"
+                  size={16}
+                />
+                <p className="text-xs text-yellow-800">
+                  Some halls are unavailable because they're occupied by other
+                  movies currently in theaters.
+                </p>
+              </div>
+            )}
           </div>
 
           {/* Showtimes */}

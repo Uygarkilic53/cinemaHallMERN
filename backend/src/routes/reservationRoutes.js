@@ -38,4 +38,11 @@ router.get(
   reservationController.getReservations
 );
 
+router.delete(
+  "/delete-reservation/:id",
+  protect,
+  adminOnly,
+  reservationController.deleteReservation
+);
+
 export default router;

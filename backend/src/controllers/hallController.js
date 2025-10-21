@@ -47,24 +47,7 @@ export const getHallById = async (req, res) => {
   }
 };
 
-export const updateHall = async (req, res) => {
-  try {
-    const { name, totalSeats, seats } = req.body;
-
-    const hall = await Hall.findByIdAndUpdate(
-      req.params.id,
-      { name, totalSeats, seats },
-      { new: true, runValidators: true }
-    );
-
-    if (!hall) return res.status(404).json({ message: "Hall not found" });
-
-    res.status(200).json(hall);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-};
-
+//admin
 export const deleteHall = async (req, res) => {
   try {
     const hall = await Hall.findByIdAndDelete(req.params.id);
@@ -77,6 +60,7 @@ export const deleteHall = async (req, res) => {
   }
 };
 
+//admin
 export const seedHalls = async (req, res) => {
   try {
     const force = req.query.force === "true";

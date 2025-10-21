@@ -11,6 +11,7 @@ import {
   generateSuggestedShowtimes,
   validateShowtime,
 } from "../../utils/showtimes";
+import { toast } from "react-toastify";
 
 export default function AddMovie() {
   const { auth } = useAuth();
@@ -149,8 +150,7 @@ export default function AddMovie() {
         },
         { headers: { Authorization: `Bearer ${auth.token}` } }
       );
-      showSuccess(res.data.msg || "Movie added successfully!");
-
+      toast.success("Movie added successfully!");
       // Reset form
       setSelectedMovie(null);
       setMovieDetails(null);

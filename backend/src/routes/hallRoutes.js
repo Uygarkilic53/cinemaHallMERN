@@ -10,8 +10,6 @@ router.get("/get-halls", hallController.getHalls);
 
 router.get("/get-hall/:id", hallController.getHallById);
 
-router.put("/update-hall/:id", protect, adminOnly, hallController.updateHall);
-
 router.delete(
   "/delete-hall/:id",
   protect,

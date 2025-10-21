@@ -8,7 +8,6 @@ dotenv.config();
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
-// Create reservation API (Step 1 - Lock seats and Create PaymentIntent)
 export const createReservation = async (req, res) => {
   try {
     const { movieId, hallId, showtime, seats, date } = req.body;
@@ -137,7 +136,7 @@ export const createReservation = async (req, res) => {
   }
 };
 
-// Step 2: Confirm Reservation after Payment (Simple - just update status)
+// Confirm Reservation after Payment
 export const confirmReservation = async (req, res) => {
   try {
     const { paymentIntentId } = req.body;
@@ -340,13 +339,27 @@ export const getReservations = async (req, res) => {
     if (showtime) filter.showtime = showtime;
 
     const reservations = await Reservation.find(filter)
-      .populate("user", "email username")
+      .populate("user", "email name")
       .populate("movie", "title")
-      .populate("hall", "name");
+      .populate("hall", "name")
+      .sort({ createdAt: -1 });
 
     res.json(reservations);
   } catch (error) {
     console.error("Get reservations error:", error);
     res.status(500).json({ message: "Server error" });
+  }
+};
+
+export const deleteReservation = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const reservation = await Reservation.findByIdAndDelete(id);
+    if (!reservation) {
+      return res.status(404).json({ message: "Reservation not found" });
+    }
+    res.status(200).json({ message: "Reservation deleted successfully" });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
 };

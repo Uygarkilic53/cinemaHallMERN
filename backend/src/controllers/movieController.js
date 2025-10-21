@@ -141,40 +141,6 @@ export const addMovieFromTMDB = async (req, res) => {
       });
     }
 
-    // Check for overlapping showtimes in the same hall
-    const existingMovies = await Movie.find({ hall: hallId });
-    const allExistingShowtimes = existingMovies.flatMap((movie) =>
-      movie.showtimes.map((showtime) => ({
-        start: new Date(showtime),
-        duration: movie.duration,
-        movieTitle: movie.title,
-      }))
-    );
-
-    for (const newShowtime of validShowtimes) {
-      const newStart = new Date(newShowtime);
-      const newEnd = new Date(
-        newStart.getTime() + (movieData.duration + 15) * 60000
-      );
-
-      for (const existing of allExistingShowtimes) {
-        const existingEnd = new Date(
-          existing.start.getTime() + (existing.duration + 15) * 60000
-        );
-
-        if (newStart < existingEnd && newEnd > existing.start) {
-          return res.status(400).json({
-            msg: `Showtime ${newStart
-              .toTimeString()
-              .slice(0, 5)} overlaps with "${existing.movieTitle}" in ${
-              hall.name
-            }`,
-            conflictingShowtime: existing.start.toTimeString().slice(0, 5),
-          });
-        }
-      }
-    }
-
     // Save in MongoDB
     const movie = await Movie.create({
       title: movieData.title,
@@ -235,6 +201,24 @@ export const updateMovie = async (req, res) => {
     if (!movie) {
       return res.status(404).json({ msg: "Movie not found" });
     }
+    // Check if the hall is already occupied by another in-theater movie
+    if (movie.inTheaters && hallId !== movie.hall?.toString()) {
+      const conflictingMovie = await Movie.findOne({
+        _id: { $ne: id },
+        hall: hallId,
+        inTheaters: true,
+      });
+
+      if (conflictingMovie) {
+        return res.status(400).json({
+          msg: `Hall is already occupied by "${conflictingMovie.title}" which is currently in theaters. Please select a different hall or remove that movie from theaters first.`,
+          conflictingMovie: {
+            id: conflictingMovie._id,
+            title: conflictingMovie.title,
+          },
+        });
+      }
+    }
 
     // Only update hall & showtimes
     if (hallId) movie.hall = hallId;
@@ -266,6 +250,22 @@ export const updateMovieInTheaters = async (req, res) => {
       });
     }
 
+    // If we are trying to turn 'inTheaters' ON, check if another movie in the same hall is already ON
+    if (!movie.inTheaters) {
+      const existingInHall = await Movie.findOne({
+        hall: movie.hall,
+        inTheaters: true,
+        _id: { $ne: movie._id }, // exclude the current movie
+      });
+
+      if (existingInHall) {
+        return res.status(400).json({
+          success: false,
+          message: `Another movie (${existingInHall.title}) is already playing in ${movie.hall}. Please remove it from theaters first.`,
+        });
+      }
+    }
+
     // Toggle the inTheaters boolean
     movie.inTheaters = !movie.inTheaters;
 
@@ -280,7 +280,7 @@ export const updateMovieInTheaters = async (req, res) => {
       data: updatedMovie,
     });
   } catch (error) {
-    console.error("Error updating movie inTheaters status:", error);
+    console.error("Error updating movie inTheaters status", error);
     res.status(500).json({
       success: false,
       msg: "Internal server error",

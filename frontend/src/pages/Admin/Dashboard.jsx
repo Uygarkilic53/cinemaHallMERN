@@ -10,7 +10,7 @@ export default function Dashboard() {
     {
       title: "Manage Halls",
       icon: <FaBuilding size={40} />,
-      route: "/admin/managehall",
+      route: "/admin/managehalls",
       gradient: "from-indigo-500 to-purple-600",
     },
     {

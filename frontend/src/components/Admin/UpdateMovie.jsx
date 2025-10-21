@@ -105,7 +105,12 @@ const UpdateMovie = () => {
       fetchMovies();
     } catch (err) {
       console.error(err);
-      toast.error("Failed to update inTheaters");
+      const errorMessage =
+        err.response?.data?.message || "Failed to update inTheaters";
+      err.response?.data?.error ||
+        "Error updating movie inTheaters status: There might be another movie in the same hall";
+      ("Failed to update inTheaters");
+      toast.error(errorMessage);
     }
   };
 

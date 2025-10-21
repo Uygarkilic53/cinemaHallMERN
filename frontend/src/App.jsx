@@ -11,6 +11,8 @@ import Footer from "./components/Footer.jsx";
 import Profile from "./pages/ViewProfile.jsx";
 import Dashboard from "./pages/Admin/Dashboard.jsx";
 import ManageMovies from "./pages/Admin/ManageMovies.jsx";
+import ManageHalls from "./pages/Admin/ManageHalls.jsx";
+import ManageReservations from "./pages/Admin/ManageReservations.jsx";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
@@ -92,6 +94,22 @@ function App() {
               element={
                 <AdminRoute>
                   <ManageMovies />
+                </AdminRoute>
+              }
+            />
+            <Route
+              path="/admin/managereservations"
+              element={
+                <AdminRoute>
+                  <ManageReservations />
+                </AdminRoute>
+              }
+            />
+            <Route
+              path="/admin/managehalls"
+              element={
+                <AdminRoute>
+                  <ManageHalls />
                 </AdminRoute>
               }
             />
