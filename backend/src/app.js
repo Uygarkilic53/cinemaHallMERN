@@ -9,6 +9,7 @@ import authRoutes from "./routes/authRoutes.js";
 import movieRoutes from "./routes/movieRoutes.js";
 import reservationRoutes from "./routes/reservationRoutes.js";
 import hallRoutes from "./routes/hallRoutes.js";
+import aiRoutes from "./routes/aiRoutes.js";
 import connectDB from "./config/db.js";
 
 const app = express();
@@ -28,6 +29,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/movies", movieRoutes);
 app.use("/api/reservations", reservationRoutes);
 app.use("/api/halls", hallRoutes);
+app.use("/api/ai", aiRoutes);
 
 // 404 Not Found Middleware
 app.use((req, res, next) => {

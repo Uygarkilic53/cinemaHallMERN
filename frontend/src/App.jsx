@@ -9,6 +9,7 @@ import Movies from "./pages/Movies.jsx";
 import Navbar from "./components/Navbar.jsx";
 import Footer from "./components/Footer.jsx";
 import Profile from "./pages/ViewProfile.jsx";
+import FloatingChatbot from "./components/FloatingChatbot.jsx";
 import Dashboard from "./pages/Admin/Dashboard.jsx";
 import ManageMovies from "./pages/Admin/ManageMovies.jsx";
 import ManageHalls from "./pages/Admin/ManageHalls.jsx";
@@ -119,6 +120,7 @@ function App() {
           </Routes>
         </main>
         <Footer />
+        <FloatingChatbot />
       </div>
     </Router>
   );
