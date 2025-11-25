@@ -4,22 +4,72 @@ class GeminiService {
   constructor() {
     this.genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
     this.model = this.genAI.getGenerativeModel({
-      model: "gemini-2.5-flash", // Updated model name
+      model: "gemini-2.5-flash",
       generationConfig: {
         temperature: 0.7,
         maxOutputTokens: 1000,
       },
     });
+
+    // Retry configuration
+    this.maxRetries = 3;
+    this.baseDelay = 1000; // 1 second
+  }
+
+  // Exponential backoff retry wrapper
+  async retryWithBackoff(fn, retries = this.maxRetries) {
+    let lastError;
+
+    for (let i = 0; i < retries; i++) {
+      try {
+        return await fn();
+      } catch (error) {
+        lastError = error;
+
+        // Check if it's a retryable error (503, 429, or network errors)
+        const isRetryable =
+          error.status === 503 ||
+          error.status === 429 ||
+          error.status === 500 ||
+          error.message.includes("overloaded") ||
+          error.message.includes("ECONNRESET");
+
+        if (!isRetryable) {
+          console.error("❌ Non-retryable error:", error.message);
+          throw error;
+        }
+
+        if (i === retries - 1) {
+          console.error(`❌ All ${retries} retry attempts failed`);
+          throw error;
+        }
+
+        // Calculate delay with exponential backoff + jitter
+        const delay = this.baseDelay * Math.pow(2, i) + Math.random() * 1000;
+        console.warn(
+          `⚠️  API overloaded. Retry ${i + 1}/${retries} in ${Math.round(
+            delay
+          )}ms... (${error.status})`
+        );
+        await this.sleep(delay);
+      }
+    }
+
+    throw lastError;
+  }
+
+  sleep(ms) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
   async getChatCompletion(messages, options = {}) {
-    try {
+    return this.retryWithBackoff(async () => {
       const systemPrompt =
         messages.find((m) => m.role === "system")?.content || "";
       const conversationHistory = messages.filter((m) => m.role !== "system");
 
       const cleanHistory = this.convertToGeminiHistory(conversationHistory);
-      const validHistory = cleanHistory.slice(0, -1); // remove only if >1 messages
+      const validHistory = cleanHistory.slice(0, -1);
 
       const chat = this.model.startChat({
         history: validHistory.length ? validHistory : [],
@@ -40,29 +90,23 @@ class GeminiService {
         role: "assistant",
         content: response.text(),
       };
-    } catch (error) {
-      console.error("Gemini API Error:", error);
-      throw new Error("Failed to get AI response");
-    }
+    });
   }
 
   async getChatCompletionWithFunctions(messages, functions) {
-    try {
-      // ✅ Extract system prompt but do NOT include it as a role in the history
+    return this.retryWithBackoff(async () => {
       const systemPrompt =
         messages.find((m) => m.role === "system")?.content || "";
       const conversationHistory = messages.filter((m) => m.role !== "system");
 
       const functionsPrompt = this.buildFunctionsPrompt(functions);
 
-      // ✅ Combine system + function + conversation into one single text prompt
       const conversationText = conversationHistory
         .map((m) => `${m.role}: ${m.content}`)
         .join("\n");
 
       const fullPrompt = `${systemPrompt}\n\n${functionsPrompt}\n\nConversation:\n${conversationText}`;
 
-      // ✅ Send as one text input from the "user"
       const result = await this.model.generateContent({
         contents: [{ role: "user", parts: [{ text: fullPrompt }] }],
       });
@@ -84,19 +128,14 @@ class GeminiService {
         role: "assistant",
         content: text,
       };
-    } catch (error) {
-      console.error("Gemini API Error:", error);
-      throw new Error("Failed to get AI response with functions");
-    }
+    });
   }
 
   convertToGeminiHistory(messages) {
-    // Ensure history starts with user role
     const filtered = messages.filter(
       (msg) => msg.role === "user" || msg.role === "assistant"
     );
 
-    // If first message isn't from user, drop assistant messages at the start
     while (filtered.length && filtered[0].role === "assistant") {
       filtered.shift();
     }
@@ -144,7 +183,7 @@ ${functionsDesc}`;
   }
 
   async streamChatCompletion(messages, onChunk, options = {}) {
-    try {
+    return this.retryWithBackoff(async () => {
       const systemPrompt =
         messages.find((m) => m.role === "system")?.content || "";
       const conversationHistory = messages.filter((m) => m.role !== "system");
@@ -169,10 +208,7 @@ ${functionsDesc}`;
       }
 
       return fullResponse;
-    } catch (error) {
-      console.error("Gemini Streaming Error:", error);
-      throw new Error("Failed to stream AI response");
-    }
+    });
   }
 }
 

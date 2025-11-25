@@ -52,7 +52,7 @@ export default function ChatWithAI() {
   };
 
   return (
-    <div className="flex flex-col h-[90vh] max-w-2xl mx-auto p-4 border border-gray-300 rounded-2xl bg-gradient-to-b from-gray-50 to-gray-100 shadow-lg">
+    <div className="mt-8 flex flex-col h-[70vh] max-w-2xl mx-auto p-4 border border-gray-300 rounded-2xl bg-gradient-to-b from-gray-50 to-gray-100 shadow-lg">
       {/* Header */}
       <div className="flex items-center justify-center gap-2 border-b pb-3 mb-3">
         <FaRobot className="text-blue-600 text-2xl" />
