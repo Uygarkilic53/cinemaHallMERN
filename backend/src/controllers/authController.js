@@ -42,7 +42,7 @@ export const login = async (req, res) => {
     const { email, password } = req.body;
 
     // Find user
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email }).select("+password");
     if (!user) {
       return res.status(401).json({ message: "Invalid email or password" });
     }
@@ -328,5 +328,87 @@ export const resetPassword = async (req, res) => {
     res
       .status(500)
       .json({ message: "An error occurred. Please try again later." });
+  }
+};
+
+export const updatePassword = async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+
+    const userId = req.user._id;
+
+    // 1. Validation: Check if both fields are present
+    if (!currentPassword || !newPassword) {
+      return res
+        .status(400)
+        .json({ message: "Please provide both current and new passwords." });
+    }
+
+    // 2. Validation: Check password length
+    if (newPassword.length < 6) {
+      return res
+        .status(400)
+        .json({ message: "Password must be at least 6 characters long." });
+    }
+
+    // 3. Find the user in the database
+
+    const user = await User.findById(userId).select("+password");
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found." });
+    }
+
+    // 4. Verify Current Password
+    // Compare the plain text 'currentPassword' with the hashed password in DB
+    const isMatch = await bcrypt.compare(currentPassword, user.password);
+
+    if (!isMatch) {
+      return res
+        .status(400)
+        .json({ message: "Current password is incorrect." });
+    }
+
+    // 5. Prevent using the exact same password (Optional but good UX)
+    if (await bcrypt.compare(newPassword, user.password)) {
+      return res.status(400).json({
+        message: "New password cannot be the same as the old password.",
+      });
+    }
+
+    // 6. Hash the New Password
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+    // 7. Update and Save
+    user.password = hashedPassword;
+    await user.save();
+
+    res.status(200).json({ message: "Password updated successfully." });
+  } catch (error) {
+    console.log("Error in updatePassword controller", error.message);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+export const updateName = async (req, res) => {
+  try {
+    const { name } = req.body;
+
+    const userId = req.user._id;
+
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found." });
+    }
+
+    user.name = name;
+    await user.save();
+
+    res.status(200).json({ message: "Name updated successfully." });
+  } catch (error) {
+    console.log("Error in updateName controller", error.message);
+    res.status(500).json({ message: "Internal Server Error" });
   }
 };

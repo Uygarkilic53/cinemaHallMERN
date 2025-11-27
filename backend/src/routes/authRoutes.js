@@ -48,4 +48,8 @@ router.get("/verify-reset-token/:token", authController.verifyResetToken);
 
 router.post("/reset-password/:token", authController.resetPassword);
 
+router.put("/update-password", protect, authController.updatePassword);
+
+router.put("/update-name", protect, authController.updateName);
+
 export default router;

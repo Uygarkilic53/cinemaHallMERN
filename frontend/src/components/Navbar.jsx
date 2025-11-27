@@ -90,10 +90,16 @@ const Navbar = () => {
               </Link>
             )}
 
-            {/* 👋 Greeting */}
+            {/* Online Greeting */}
             {auth.token && (
-              <span className="text-gray-600">
-                👋 Hi, <span className="font-semibold">{auth.name}</span>
+              <span className="text-gray-600 flex items-center gap-2">
+                <div className="relative">
+                  <span className="flex h-3 w-3">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+                  </span>
+                </div>
+                Hi, <span className="font-semibold">{auth.name}</span>
               </span>
             )}
           </div>
@@ -192,11 +198,16 @@ const Navbar = () => {
               </Link>
             )}
 
-            {/* 👋 Greeting in mobile */}
             {auth.token && (
-              <p className="block text-gray-600 font-medium px-1">
-                👋 Hi, {auth.name}
-              </p>
+              <div className="flex items-center gap-2 bg-blue-50 hover:bg-blue-100 text-blue-700 px-4 py-2 rounded-full transition-colors duration-200 cursor-pointer border border-blue-100">
+                <div className="relative">
+                  <span className="flex h-3 w-3">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+                  </span>
+                </div>
+                <p className="font-semibold text-sm">Hi, {auth.name}</p>
+              </div>
             )}
 
             <hr className="my-2" />
