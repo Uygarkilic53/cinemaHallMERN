@@ -3,6 +3,7 @@ import { FiEdit, FiTrash2 } from "react-icons/fi";
 import { toast } from "react-toastify";
 import api from "../../services/api.js";
 import UpdateMovieModal from "./UpdateMovieModal.jsx";
+import LoadingSpinner from "../LoadingSpinner";
 
 const UpdateMovie = () => {
   const [movies, setMovies] = useState([]);
@@ -65,7 +66,7 @@ const UpdateMovie = () => {
       );
       if (res.data.success) {
         setMovies(res.data.movies);
-        setTotalPages(Math.ceil(res.data.count / limit));
+        setTotalPages(res.data.totalPages);
 
         // Fetch banners for the movies
         await fetchAllMovieBanners(res.data.movies);
@@ -124,7 +125,7 @@ const UpdateMovie = () => {
       <h2 className="text-3xl font-bold mb-6 text-gray-800">Update Movies</h2>
 
       {loading ? (
-        <p className="text-center">Loading movies...</p>
+        <LoadingSpinner message="Loading Movies" />
       ) : movies.length === 0 ? (
         <div className="text-center py-20 text-gray-500">
           <p className="text-xl font-medium">No movies have been added yet.</p>

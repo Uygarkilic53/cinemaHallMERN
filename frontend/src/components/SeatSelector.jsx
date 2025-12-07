@@ -14,7 +14,7 @@ export default function SeatSelector({
     <div className="flex flex-col items-center gap-4 mt-4">
       {showScreen && (
         <div className="w-full h-6 bg-gray-400 rounded-md mb-4 text-center text-sm text-gray-700 flex items-center justify-center">
-          Screen
+          IMAX
         </div>
       )}
 

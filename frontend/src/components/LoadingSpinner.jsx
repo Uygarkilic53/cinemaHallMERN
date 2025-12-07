@@ -1,12 +1,17 @@
-export default function LoadingSpinner({ message = "Loading..." }) {
+export default function LoadingSpinner({ message = "Loading" }) {
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-50">
+    <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       <div className="text-center">
-        <div className="relative inline-block">
-          <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-          <div className="w-16 h-16 border-4 border-blue-300 border-b-transparent rounded-full animate-spin-reverse absolute top-0 left-0"></div>
+        {/* Spinner Circle */}
+        <div className="relative w-16 h-16 mx-auto mb-6">
+          <div className="absolute inset-0 border-4 border-purple-200 rounded-full"></div>
+          <div className="absolute inset-0 border-4 border-transparent border-t-purple-600 rounded-full animate-spin"></div>
         </div>
-        <p className="mt-4 text-lg text-gray-600">{message}</p>
+
+        {/* Message */}
+        <div className="flex items-center justify-center">
+          <span className="text-lg font-semibold text-gray-700">{message}</span>
+        </div>
       </div>
     </div>
   );

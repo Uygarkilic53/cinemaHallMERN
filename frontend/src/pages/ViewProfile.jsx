@@ -11,6 +11,7 @@ import {
   FaTimes,
   FaCheck,
 } from "react-icons/fa";
+import LoadingSpinner from "../components/LoadingSpinner.jsx";
 
 export default function ViewProfile() {
   const [user, setUser] = useState(null);
@@ -140,11 +141,7 @@ export default function ViewProfile() {
   }
 
   if (!user) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <p className="text-gray-600 text-lg">Loading profile...</p>
-      </div>
-    );
+    return <LoadingSpinner message="Loading profile..." />;
   }
 
   return (

@@ -2,6 +2,8 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import NotFound from "./components/NotFound.jsx";
 import Login from "./pages/Login.jsx";
 import SignUp from "./pages/Signup.jsx";
+import Halls from "./pages/Halls.jsx";
+import Hall from "./components/Hall.jsx";
 import MovieDetail from "./pages/MovieDetails.jsx";
 import Reservation from "./pages/Reservation.jsx";
 import MyReservations from "./pages/MyReservations.jsx";
@@ -52,6 +54,8 @@ function App() {
               }
             />
 
+            <Route path="/halls" element={<Halls />} />
+            <Route path="/hall/:id" element={<Hall />} />
             <Route path="/movies/:id" element={<MovieDetail />} />
             <Route path="/movies" element={<Movies />} />
 

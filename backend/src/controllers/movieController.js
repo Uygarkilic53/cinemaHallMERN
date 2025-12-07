@@ -41,7 +41,11 @@ export const getAllMovies = async (req, res) => {
     const skip = (page - 1) * limit;
 
     const [movies, total] = await Promise.all([
-      Movie.find().populate("hall", "name").skip(skip).limit(limit),
+      Movie.find()
+        .populate("hall", "name")
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit),
       Movie.countDocuments(),
     ]);
 
