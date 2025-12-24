@@ -14,7 +14,6 @@
   </p>
 
   <img src="https://img.shields.io/badge/MERN-Full%20Stack-blue?style=for-the-badge&logo=react" alt="MERN Stack">
-  <img src="https://img.shields.io/badge/Status-In%20Development-orange?style=for-the-badge" alt="Status">
   <img src="https://img.shields.io/badge/AI-Powered-purple?style=for-the-badge&logo=openai" alt="AI Powered">
 </div>
 
