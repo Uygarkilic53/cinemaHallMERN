@@ -140,6 +140,7 @@ export default function Signup() {
               name="password"
               placeholder="Enter your password"
               value={form.password}
+              autoComplete="new-password"
               onChange={handleChange}
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
               required
@@ -159,6 +160,7 @@ export default function Signup() {
               name="confirmPassword"
               placeholder="Re-enter your password"
               value={form.confirmPassword}
+              autoComplete="new-password"
               onChange={handleChange}
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
               required
